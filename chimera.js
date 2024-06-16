@@ -1,8 +1,8 @@
 var chimera = {}
 
-//яночкаа ♥
+//яночкаа ♥ //UPD а все яночка больше не нравится...
 
-var time = 0
+var on_load_screen_time = Globals.Realtime() //это максимально хуево выглядит, а еще и при каждой перезагрузке скрипта будет появляться
 
 var ui_handler = {}
 var defines = {}
@@ -376,16 +376,21 @@ menu.render = function() {
             tabs.push(j) //ЭТО ЧИСТО НАУЙ СУКА ТОПЧИК ТАБЫ ПО ИНДЕКСАМ 0 1 2 3 4 
         }
 
+        /*
         if (menu.data.current_tab == j) {
             var color = menu.colors.orange
         } //по сути варом должно быть не
         else {
-            var color = menu.helpers.override_alpha(menu.colors.orange_light, menu_alpha)
+            var color = menu.helpers.override_alpha(menu.colors.orange_light, menu_alpha) //ебать я долбаеб нахуй я два раза фунцкию вызывал
         }
     
 
-        Render.Text(x_pos + 103 + tab_space * tab_render + tab_space / 2, y + menu_border / 2 - 5 , 1, j, menu.helpers.override_alpha(color, menu_alpha), font.tab )
-        Render.Text(x_pos + 103 + tab_space * tab_render + tab_space / 2, y + menu_border / 2 + 5, 1, tab_description[tab_render], menu.helpers.override_alpha(color, menu_alpha), font.tab_description )
+        */
+
+        var tab_name_color = visual_controller.new_animation(j + '_tab', menu.data.current_tab == j ? menu.colors.orange : menu.colors.orange_light, undefined, 0.5) // ебать я ахуенный 
+
+        Render.Text(x_pos + 103 + tab_space * tab_render + tab_space / 2, y + menu_border / 2 - 5 , 1, j, menu.helpers.override_alpha(tab_name_color, menu_alpha), font.tab )
+        Render.Text(x_pos + 103 + tab_space * tab_render + tab_space / 2, y + menu_border / 2 + 6, 1, tab_description[tab_render], menu.helpers.override_alpha(tab_name_color, menu_alpha), font.tab_description )
       //  Render.FilledRect(x + 103 + tab_space * tab_render, y, 1, menu_border, menu.colors.orange)
 
         if (menu.helpers.in_bounds(Input.GetCursorPosition(), [x_pos + 103 + tab_space * tab_render, y], [x_pos + 103 + tab_space * tab_render + tab_space, y + menu_border]) && menu.helpers.input_is_key_pressed(0x01) && menu_alpha == 1) {
@@ -469,8 +474,13 @@ menu.render = function() {
 
                         if (current_item_condition) {
                             var name_sz = Render.TextSize(current_item.name, font.default)
+                            var alpha_button = visual_controller.new_animation(h + i + '_button', 0)
 
                             Render.FilledRect(x + 9 + 10, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u], name_sz[0] + 10, 12,  menu.helpers.override_alpha(menu.colors.orange, alpha))
+
+                            if (menu.helpers.in_bounds(Input.GetCursorPosition(), [x + 9 + 10, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u]], [x + 9 + 10 + name_sz[0] + 10, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u] + 12]) && Input.IsKeyPressed(0x01) && (menu.data.item_in_use == null || menu.data.item_in_use == i) && alpha > 0.98 ) {
+                                Render.FilledRect(x + 9 + 10, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u], name_sz[0] + 10, 12,  menu.helpers.override_alpha([32, 32, 32, 255], alpha * 0.5))
+                            }
 
                             Render.String(x + 9 + 10 + 5 + 1, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u] - 2 + 1, 0, current_item.name, [0, 0, 0, Math.round(alpha * 255)], font.default)
                             Render.String(x + 9 + 10 + 5, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u] - 2, 0, current_item.name, [255, 255, 255, Math.round(alpha * 255)], font.default)
@@ -482,6 +492,9 @@ menu.render = function() {
                                 
                                 menu.data.item_in_use = i
                             }
+                            
+                            
+
 
                             item_spacing[h][u] = item_spacing[h][u] + 22 * alpha
 
@@ -871,7 +884,7 @@ menu.destroy = function(tab, subtab, name) {
 }
 
 menu.get_value = function(tab, subtab, name) {
-    return (!menu.data.items[tab][subtab][name]) ? Cheat.PrintLog('Facing a problem while getting ' + h + ' > ' + u + ' > ' + i + ' value.') : menu.data.items[tab][subtab][name].value
+    return (!menu.data.items[tab][subtab][name]) ? Cheat.PrintLog('Facing a problem while getting ' + h + ' > ' + u + ' > ' + i + ' value.', [255, 150, 150, 255]) : menu.data.items[tab][subtab][name].value
 }
 
 menu.get_color = function(tab, subtab, name) {
@@ -1084,6 +1097,15 @@ defines.noscope_weapons[11] = true
 defines.noscope_weapons[9] = true
 defines.noscope_weapons[40] = true
 
+anti_bruteforce.menu_elements = []
+
+anti_bruteforce.global_switch = ui_handler.new_element('Anti Bruteforce', 'global_switch', menu.new_checkbox('ABF', '1', 'Enable'))
+
+anti_bruteforce.ui_condition = function() {
+    return ui_handler.elements['Anti Bruteforce']['global_switch'].reference.value == true
+}
+
+anti_bruteforce.hidden_value = ui_handler.new_element('Anti Bruteforce', 'slider_antibrute_visuals', menu.new_slider('ABF', '1', 'я ебал просто какая же она ахуенная... ее лицо... ее руки... ее тело... я не могу сдерживать свои эмоции', 2, 20, function() { return false}))
 
 ui_handler.new_element('Global', 'global_switch', menu.new_checkbox('GLOBAL', '1', 'Enable'))
 
@@ -1263,7 +1285,7 @@ visual_controller.update_animations = function() {
     }
 }
 
-visual_controller.new_animation = function(name, new_value, removing) {
+visual_controller.new_animation = function(name, new_value, removing, speed_multiplier) {
 
     if (!visual_controller.animation_controller_items[name]) {
 
@@ -1275,19 +1297,23 @@ visual_controller.new_animation = function(name, new_value, removing) {
 
     }
 
+    if (speed_multiplier == undefined) {
+        speed_multiplier = 1
+    }
+
     if (removing == undefined) {   
         visual_controller.animation_controller_items[name].called_this_frame = true
     }
 
     if (typeof(new_value) == 'object') {  //ну я не знаю, анимировать векторы я не планировал, так что  П О Х У Й
 
-        var lerping = math.lerp(visual_controller.animation_speed, visual_controller.animation_controller_items[name].color, new_value)
+        var lerping = math.lerp(visual_controller.animation_speed * speed_multiplier, visual_controller.animation_controller_items[name].color, new_value)
         visual_controller.animation_controller_items[name].color = lerping
 
         return lerping
     }
 
-    var lerping = math.lerp(visual_controller.animation_speed, visual_controller.animation_controller_items[name].number, new_value)
+    var lerping = math.lerp(visual_controller.animation_speed * speed_multiplier, visual_controller.animation_controller_items[name].number, new_value)
     visual_controller.animation_controller_items[name].number = lerping
 
     return lerping
@@ -1561,7 +1587,8 @@ visual_controller.alternative_indicators = function() {
 
 
 visual_controller.end_render = function() {
-    
+
+      
 
     visual_controller.update_animations()
     visual_controller.non_lerp_offset = visual_controller.start_offset
@@ -2065,15 +2092,6 @@ conditional_AntiAims.new_condition('Air', function(key, flags) {
 })
 
 
-anti_bruteforce.menu_elements = []
-
-anti_bruteforce.global_switch = ui_handler.new_element('Anti Bruteforce', 'global_switch', menu.new_checkbox('ABF', '1', 'Enable'))
-
-anti_bruteforce.ui_condition = function() {
-    return ui_handler.elements['Anti Bruteforce']['global_switch'].reference.value == true
-}
-
-anti_bruteforce.hidden_value = ui_handler.new_element('Anti Bruteforce', 'slider_antibrute_visuals', menu.new_slider('ABF', '1', 'я ебал просто какая же она ахуенная... ее лицо... ее руки... ее тело... я не могу сдерживать свои эмоции', 2, 20, function() { return false}))
 
 anti_bruteforce.new_button = ui_handler.new_element('Anti Bruteforce', 'Create New Phase', menu.new_button('ABF', '1', 'Add', function() {anti_bruteforce.create_new_phase()}, anti_bruteforce.ui_condition))
 anti_bruteforce.remove_button = ui_handler.new_element('Anti Bruteforce', 'Remove Phase', menu.new_button('ABF', '1', 'Remove', function() {anti_bruteforce.remove_phase()}, anti_bruteforce.ui_condition))
@@ -2244,7 +2262,9 @@ configs.parse = function() {
             for (i in menu.data.items[h][u]) {
 
                 if (i.indexOf('Color') == -1) {
+                    
                     DataFile.SetKey('chimera.config', h + '|' + u + '|' + i , String(menu.get_value(h, u, i)))
+                   // Cheat.Print(h + '|' + u + '|' + '[Phase ' + i + '] Fake Limit' + ' | ' + Number(DataFile.GetKey('chimera.config', h + '|' + u + '|' + '[Phase ' + i + '] Fake Limit')) + '\n')
                 }
                 else {
                     DataFile.SetKey('chimera.config', h + '|' + u + '|' + i , String(menu.get_color(h, u, i)))
@@ -2260,6 +2280,9 @@ configs.parse = function() {
 configs.load = function() {
     
     DataFile.Load('chimera.config')
+
+    var antibrute_phases = -1
+
     for (h in menu.data.items) {
 
         for (u in menu.data.items[h]) {
@@ -2278,18 +2301,7 @@ configs.load = function() {
                     var item = menu.data.items[h][u][i]
                     var type = item.type
                     
-                    var antibrute_phases = menu.get_value('ABF', '1', 'я ебал просто какая же она ахуенная... ее лицо... ее руки... ее тело... я не могу сдерживать свои эмоции')
-
-                    if (anti_bruteforce.menu_elements.length > antibrute_phases) {
-                        while (anti_bruteforce.menu_elements.length > antibrute_phases) {
-                            anti_bruteforce.remove_phase()
-                        }
-                    }
-                    else {
-                        while (anti_bruteforce.menu_elements.length < antibrute_phases) {
-                            anti_bruteforce.create_new_phase()
-                        }
-                    }                    
+                                        
 
                     switch (type) {
 
@@ -2315,6 +2327,12 @@ configs.load = function() {
                         case 'slider' :
                             menu.set_value(h, u, i, Number(key))
                         break
+
+                        
+                    }
+
+                    if (i == 'я ебал просто какая же она ахуенная... ее лицо... ее руки... ее тело... я не могу сдерживать свои эмоции') {
+                        antibrute_phases = Number(key)
                     }
                 }
                 else {
@@ -2337,13 +2355,29 @@ configs.load = function() {
             }
         }
     }
+
+    if (anti_bruteforce.menu_elements.length > antibrute_phases) {
+        while (anti_bruteforce.menu_elements.length > antibrute_phases) {
+            anti_bruteforce.remove_phase()
+        }
+    }
+    else {
+        while (anti_bruteforce.menu_elements.length < antibrute_phases) {
+            anti_bruteforce.create_new_phase()
+        }
+    }
+
+    for (j = 1; j < antibrute_phases + 1; j ++) {
+        //Cheat.Print('[Phase ' + j + '] Fake Limit' + ' | ' + Number(DataFile.GetKey('chimera.config', 'ABF' + '|' + '1' + '|' + '[Phase ' + j + '] Fake Limit')) + '\n')
+        menu.set_value('ABF', '1', '[Phase ' + j + '] Fake Limit', Number(DataFile.GetKey('chimera.config', 'ABF' + '|' + '1' + '|' + '[Phase ' + j + '] Fake Limit')))
+    }
 }
 
 ui_handler.new_element('Configs', 'export_config', menu.new_button('CONFIGS', '1', 'Save config to scirpts derictory', function() {configs.parse()}))
 
 ui_handler.new_element('Configs', 'import_config', menu.new_button('CONFIGS', '1', 'Import config from scirpts derictory', function() {configs.load()}))
 
-ui_handler.new_element('Configs', 'label_info', menu.new_label('CONFIGS', '2', 'To load config first put it into scripts folder.'))
+ui_handler.new_element('Configs', 'label_info', menu.new_label('CONFIGS', '1', 'To load config first put it into scripts folder.'))
 
 /**
  * 
@@ -2768,9 +2802,9 @@ Cheat.RegisterCallback('Draw', 'menu_effects.handle')
 Cheat.RegisterCallback('Draw', 'menu.render')
 Cheat.RegisterCallback('Draw', 'menu.helpers.input_update')var chimera = {}
 
-//яночкаа ♥
+//яночкаа ♥ //UPD а все яночка больше не нравится...
 
-var time = 0
+var on_load_screen_time = Globals.Realtime() //это максимально хуево выглядит, а еще и при каждой перезагрузке скрипта будет появляться
 
 var ui_handler = {}
 var defines = {}
@@ -3144,16 +3178,21 @@ menu.render = function() {
             tabs.push(j) //ЭТО ЧИСТО НАУЙ СУКА ТОПЧИК ТАБЫ ПО ИНДЕКСАМ 0 1 2 3 4 
         }
 
+        /*
         if (menu.data.current_tab == j) {
             var color = menu.colors.orange
         } //по сути варом должно быть не
         else {
-            var color = menu.helpers.override_alpha(menu.colors.orange_light, menu_alpha)
+            var color = menu.helpers.override_alpha(menu.colors.orange_light, menu_alpha) //ебать я долбаеб нахуй я два раза фунцкию вызывал
         }
     
 
-        Render.Text(x_pos + 103 + tab_space * tab_render + tab_space / 2, y + menu_border / 2 - 5 , 1, j, menu.helpers.override_alpha(color, menu_alpha), font.tab )
-        Render.Text(x_pos + 103 + tab_space * tab_render + tab_space / 2, y + menu_border / 2 + 5, 1, tab_description[tab_render], menu.helpers.override_alpha(color, menu_alpha), font.tab_description )
+        */
+
+        var tab_name_color = visual_controller.new_animation(j + '_tab', menu.data.current_tab == j ? menu.colors.orange : menu.colors.orange_light, undefined, 0.5) // ебать я ахуенный 
+
+        Render.Text(x_pos + 103 + tab_space * tab_render + tab_space / 2, y + menu_border / 2 - 5 , 1, j, menu.helpers.override_alpha(tab_name_color, menu_alpha), font.tab )
+        Render.Text(x_pos + 103 + tab_space * tab_render + tab_space / 2, y + menu_border / 2 + 6, 1, tab_description[tab_render], menu.helpers.override_alpha(tab_name_color, menu_alpha), font.tab_description )
       //  Render.FilledRect(x + 103 + tab_space * tab_render, y, 1, menu_border, menu.colors.orange)
 
         if (menu.helpers.in_bounds(Input.GetCursorPosition(), [x_pos + 103 + tab_space * tab_render, y], [x_pos + 103 + tab_space * tab_render + tab_space, y + menu_border]) && menu.helpers.input_is_key_pressed(0x01) && menu_alpha == 1) {
@@ -3237,8 +3276,13 @@ menu.render = function() {
 
                         if (current_item_condition) {
                             var name_sz = Render.TextSize(current_item.name, font.default)
+                            var alpha_button = visual_controller.new_animation(h + i + '_button', 0)
 
                             Render.FilledRect(x + 9 + 10, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u], name_sz[0] + 10, 12,  menu.helpers.override_alpha(menu.colors.orange, alpha))
+
+                            if (menu.helpers.in_bounds(Input.GetCursorPosition(), [x + 9 + 10, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u]], [x + 9 + 10 + name_sz[0] + 10, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u] + 12]) && Input.IsKeyPressed(0x01) && (menu.data.item_in_use == null || menu.data.item_in_use == i) && alpha > 0.98 ) {
+                                Render.FilledRect(x + 9 + 10, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u], name_sz[0] + 10, 12,  menu.helpers.override_alpha([32, 32, 32, 255], alpha * 0.5))
+                            }
 
                             Render.String(x + 9 + 10 + 5 + 1, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u] - 2 + 1, 0, current_item.name, [0, 0, 0, Math.round(alpha * 255)], font.default)
                             Render.String(x + 9 + 10 + 5, y + menu_border * 1.5 + 9 + 10 + item_spacing[h][u] - 2, 0, current_item.name, [255, 255, 255, Math.round(alpha * 255)], font.default)
@@ -3250,6 +3294,9 @@ menu.render = function() {
                                 
                                 menu.data.item_in_use = i
                             }
+                            
+                            
+
 
                             item_spacing[h][u] = item_spacing[h][u] + 22 * alpha
 
@@ -3639,7 +3686,7 @@ menu.destroy = function(tab, subtab, name) {
 }
 
 menu.get_value = function(tab, subtab, name) {
-    return (!menu.data.items[tab][subtab][name]) ? Cheat.PrintLog('Facing a problem while getting ' + h + ' > ' + u + ' > ' + i + ' value.') : menu.data.items[tab][subtab][name].value
+    return (!menu.data.items[tab][subtab][name]) ? Cheat.PrintLog('Facing a problem while getting ' + h + ' > ' + u + ' > ' + i + ' value.', [255, 150, 150, 255]) : menu.data.items[tab][subtab][name].value
 }
 
 menu.get_color = function(tab, subtab, name) {
@@ -3852,6 +3899,15 @@ defines.noscope_weapons[11] = true
 defines.noscope_weapons[9] = true
 defines.noscope_weapons[40] = true
 
+anti_bruteforce.menu_elements = []
+
+anti_bruteforce.global_switch = ui_handler.new_element('Anti Bruteforce', 'global_switch', menu.new_checkbox('ABF', '1', 'Enable'))
+
+anti_bruteforce.ui_condition = function() {
+    return ui_handler.elements['Anti Bruteforce']['global_switch'].reference.value == true
+}
+
+anti_bruteforce.hidden_value = ui_handler.new_element('Anti Bruteforce', 'slider_antibrute_visuals', menu.new_slider('ABF', '1', 'я ебал просто какая же она ахуенная... ее лицо... ее руки... ее тело... я не могу сдерживать свои эмоции', 2, 20, function() { return false}))
 
 ui_handler.new_element('Global', 'global_switch', menu.new_checkbox('GLOBAL', '1', 'Enable'))
 
@@ -4031,7 +4087,7 @@ visual_controller.update_animations = function() {
     }
 }
 
-visual_controller.new_animation = function(name, new_value, removing) {
+visual_controller.new_animation = function(name, new_value, removing, speed_multiplier) {
 
     if (!visual_controller.animation_controller_items[name]) {
 
@@ -4043,19 +4099,23 @@ visual_controller.new_animation = function(name, new_value, removing) {
 
     }
 
+    if (speed_multiplier == undefined) {
+        speed_multiplier = 1
+    }
+
     if (removing == undefined) {   
         visual_controller.animation_controller_items[name].called_this_frame = true
     }
 
     if (typeof(new_value) == 'object') {  //ну я не знаю, анимировать векторы я не планировал, так что  П О Х У Й
 
-        var lerping = math.lerp(visual_controller.animation_speed, visual_controller.animation_controller_items[name].color, new_value)
+        var lerping = math.lerp(visual_controller.animation_speed * speed_multiplier, visual_controller.animation_controller_items[name].color, new_value)
         visual_controller.animation_controller_items[name].color = lerping
 
         return lerping
     }
 
-    var lerping = math.lerp(visual_controller.animation_speed, visual_controller.animation_controller_items[name].number, new_value)
+    var lerping = math.lerp(visual_controller.animation_speed * speed_multiplier, visual_controller.animation_controller_items[name].number, new_value)
     visual_controller.animation_controller_items[name].number = lerping
 
     return lerping
@@ -4329,7 +4389,8 @@ visual_controller.alternative_indicators = function() {
 
 
 visual_controller.end_render = function() {
-    
+
+      
 
     visual_controller.update_animations()
     visual_controller.non_lerp_offset = visual_controller.start_offset
@@ -4833,15 +4894,6 @@ conditional_AntiAims.new_condition('Air', function(key, flags) {
 })
 
 
-anti_bruteforce.menu_elements = []
-
-anti_bruteforce.global_switch = ui_handler.new_element('Anti Bruteforce', 'global_switch', menu.new_checkbox('ABF', '1', 'Enable'))
-
-anti_bruteforce.ui_condition = function() {
-    return ui_handler.elements['Anti Bruteforce']['global_switch'].reference.value == true
-}
-
-anti_bruteforce.hidden_value = ui_handler.new_element('Anti Bruteforce', 'slider_antibrute_visuals', menu.new_slider('ABF', '1', 'я ебал просто какая же она ахуенная... ее лицо... ее руки... ее тело... я не могу сдерживать свои эмоции', 2, 20, function() { return false}))
 
 anti_bruteforce.new_button = ui_handler.new_element('Anti Bruteforce', 'Create New Phase', menu.new_button('ABF', '1', 'Add', function() {anti_bruteforce.create_new_phase()}, anti_bruteforce.ui_condition))
 anti_bruteforce.remove_button = ui_handler.new_element('Anti Bruteforce', 'Remove Phase', menu.new_button('ABF', '1', 'Remove', function() {anti_bruteforce.remove_phase()}, anti_bruteforce.ui_condition))
@@ -5012,7 +5064,9 @@ configs.parse = function() {
             for (i in menu.data.items[h][u]) {
 
                 if (i.indexOf('Color') == -1) {
+                    
                     DataFile.SetKey('chimera.config', h + '|' + u + '|' + i , String(menu.get_value(h, u, i)))
+                   // Cheat.Print(h + '|' + u + '|' + '[Phase ' + i + '] Fake Limit' + ' | ' + Number(DataFile.GetKey('chimera.config', h + '|' + u + '|' + '[Phase ' + i + '] Fake Limit')) + '\n')
                 }
                 else {
                     DataFile.SetKey('chimera.config', h + '|' + u + '|' + i , String(menu.get_color(h, u, i)))
@@ -5028,6 +5082,9 @@ configs.parse = function() {
 configs.load = function() {
     
     DataFile.Load('chimera.config')
+
+    var antibrute_phases = -1
+
     for (h in menu.data.items) {
 
         for (u in menu.data.items[h]) {
@@ -5046,18 +5103,7 @@ configs.load = function() {
                     var item = menu.data.items[h][u][i]
                     var type = item.type
                     
-                    var antibrute_phases = menu.get_value('ABF', '1', 'я ебал просто какая же она ахуенная... ее лицо... ее руки... ее тело... я не могу сдерживать свои эмоции')
-
-                    if (anti_bruteforce.menu_elements.length > antibrute_phases) {
-                        while (anti_bruteforce.menu_elements.length > antibrute_phases) {
-                            anti_bruteforce.remove_phase()
-                        }
-                    }
-                    else {
-                        while (anti_bruteforce.menu_elements.length < antibrute_phases) {
-                            anti_bruteforce.create_new_phase()
-                        }
-                    }                    
+                                        
 
                     switch (type) {
 
@@ -5083,6 +5129,12 @@ configs.load = function() {
                         case 'slider' :
                             menu.set_value(h, u, i, Number(key))
                         break
+
+                        
+                    }
+
+                    if (i == 'я ебал просто какая же она ахуенная... ее лицо... ее руки... ее тело... я не могу сдерживать свои эмоции') {
+                        antibrute_phases = Number(key)
                     }
                 }
                 else {
@@ -5105,13 +5157,29 @@ configs.load = function() {
             }
         }
     }
+
+    if (anti_bruteforce.menu_elements.length > antibrute_phases) {
+        while (anti_bruteforce.menu_elements.length > antibrute_phases) {
+            anti_bruteforce.remove_phase()
+        }
+    }
+    else {
+        while (anti_bruteforce.menu_elements.length < antibrute_phases) {
+            anti_bruteforce.create_new_phase()
+        }
+    }
+
+    for (j = 1; j < antibrute_phases + 1; j ++) {
+        //Cheat.Print('[Phase ' + j + '] Fake Limit' + ' | ' + Number(DataFile.GetKey('chimera.config', 'ABF' + '|' + '1' + '|' + '[Phase ' + j + '] Fake Limit')) + '\n')
+        menu.set_value('ABF', '1', '[Phase ' + j + '] Fake Limit', Number(DataFile.GetKey('chimera.config', 'ABF' + '|' + '1' + '|' + '[Phase ' + j + '] Fake Limit')))
+    }
 }
 
 ui_handler.new_element('Configs', 'export_config', menu.new_button('CONFIGS', '1', 'Save config to scirpts derictory', function() {configs.parse()}))
 
 ui_handler.new_element('Configs', 'import_config', menu.new_button('CONFIGS', '1', 'Import config from scirpts derictory', function() {configs.load()}))
 
-ui_handler.new_element('Configs', 'label_info', menu.new_label('CONFIGS', '2', 'To load config first put it into scripts folder.'))
+ui_handler.new_element('Configs', 'label_info', menu.new_label('CONFIGS', '1', 'To load config first put it into scripts folder.'))
 
 /**
  * 
