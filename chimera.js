@@ -153,7 +153,7 @@ math.lerp_reverse = function(value, min, max) {
 math.dist_to = function(a, b) {
     
     var vector_length = function(a) {return Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2])}
-    return vector_length(a[0] - b[0], a[1] - b[1], a[2] - b[2])
+    return vector_length([a[0] - b[0], a[1] - b[1], a[2] - b[2]])
 }
 
 math.closest_point_on_ray = function(ray_from, ray_to, desired_point) {
@@ -2050,6 +2050,7 @@ anti_bruteforce.bullet_impact = function(impact_vector, enemy_eye_position, eye_
     var distance = math.dist_to(math.closest_point_on_ray(impact_vector, enemy_eye_position, eye_position), eye_position)
 
 
+
     if (distance > anti_bruteforce.work_distance) {
         return
     }
@@ -2414,23 +2415,51 @@ damage_marker.event = function() {
 custom_scope.animation_state = 0
 
 custom_scope.render = function() {
+    var set_dropdown_value = function (value, index, enable) {
+        var mask = 1 << index;
+        
+        return enable ? ( value | mask ) : ( value & ~mask );
+    }
 
     var local_player = Entity.GetLocalPlayer()
+    var removals_path = ['Visuals', 'Extra','Removals', 'Removals']
 
     if (!World.GetMapName()) {
+        UI.SetValue(removals_path, set_dropdown_value(UI.GetValue(removals_path), 2, 1))
+        Convar.SetInt("r_drawvgui", 1)
         return
     }
 
     if (!local_player) {
+        UI.SetValue(removals_path, set_dropdown_value(UI.GetValue(removals_path), 2, 1))
+        Convar.SetInt("r_drawvgui", 1)
         return
     }
 
     if (Entity.GetProp(local_player, 'CBasePlayer', 'm_iHealth') < 1) {
+        UI.SetValue(removals_path, set_dropdown_value(UI.GetValue(removals_path), 2, 1))
+        Convar.SetInt("r_drawvgui", 1)
         return
     }
 
 
+
     var is_enabled = ui_handler.elements['Visuals']['custom_scope'].reference.value && Entity.GetProp(local_player, 'CCSPlayer', 'm_bIsScoped')
+
+    var planted_c4_table = Entity.GetEntitiesByClassID(129)[0]
+    var is_c4_planted = planted_c4_table != undefined
+    var bomb_distance = 100
+
+    if (is_c4_planted || !is_enabled || Input.IsConsoleOpen()) {
+        UI.SetValue(removals_path, set_dropdown_value(UI.GetValue(removals_path), 2, 1))
+        Convar.SetInt("r_drawvgui", 1)
+    }
+    else {
+        UI.SetValue(removals_path, set_dropdown_value(UI.GetValue(removals_path), 2, 0))
+        Convar.SetInt("r_drawvgui", 0)
+    }
+    
+
 
     if (is_enabled) {
         custom_scope.animation_state = visual_controller.new_animation('custom_scope.animation_state', 1)
@@ -2446,14 +2475,14 @@ custom_scope.render = function() {
 
     var center_offset = ui_handler.elements['Visuals']['custom_scope_gap'].reference.value * custom_scope.animation_state
 
-    var lenght = ui_handler.elements['Visuals']['custom_scope_size'].reference.value * custom_scope.animation_state
+    var length = ui_handler.elements['Visuals']['custom_scope_size'].reference.value * custom_scope.animation_state
     var color = ui_handler.elements['Visuals']['custom_scope_color'].reference.color
 
-    Render.GradientRect(defines.screen_size[0] / 2 + center_offset + 1, defines.screen_size[1] / 2, lenght, 1, 1, menu.helpers.override_alpha(color, custom_scope.animation_state), menu.helpers.override_alpha(color, 0) )
-    Render.GradientRect(defines.screen_size[0] / 2 - center_offset - lenght, defines.screen_size[1] / 2, lenght, 1, 1, menu.helpers.override_alpha(color, 0), menu.helpers.override_alpha(color, custom_scope.animation_state) )
+    Render.GradientRect(defines.screen_size[0] / 2 + center_offset + 1, defines.screen_size[1] / 2, length, 1, 1, menu.helpers.override_alpha(color, custom_scope.animation_state), menu.helpers.override_alpha(color, 0) )
+    Render.GradientRect(defines.screen_size[0] / 2 - center_offset - length, defines.screen_size[1] / 2, length, 1, 1, menu.helpers.override_alpha(color, 0), menu.helpers.override_alpha(color, custom_scope.animation_state) )
     
-    Render.GradientRect(defines.screen_size[0] / 2, defines.screen_size[1] / 2 - center_offset - lenght, 1, lenght, 0, menu.helpers.override_alpha(color, 0), menu.helpers.override_alpha(color, custom_scope.animation_state) )
-    Render.GradientRect(defines.screen_size[0] / 2, defines.screen_size[1] / 2 + center_offset + 1, 1, lenght, 0, menu.helpers.override_alpha(color, custom_scope.animation_state), menu.helpers.override_alpha(color, 0) )
+    Render.GradientRect(defines.screen_size[0] / 2, defines.screen_size[1] / 2 - center_offset - length, 1, length, 0, menu.helpers.override_alpha(color, 0), menu.helpers.override_alpha(color, custom_scope.animation_state) )
+    Render.GradientRect(defines.screen_size[0] / 2, defines.screen_size[1] / 2 + center_offset + 1, 1, length, 0, menu.helpers.override_alpha(color, custom_scope.animation_state), menu.helpers.override_alpha(color, 0) )
     
 
 }
@@ -2580,6 +2609,13 @@ Cheat.RegisterCallback('CreateMove', 'conditional_AntiAims.update_conditions')
 
 
 function draw_kalbek() {
+    var set_dropdown_value = function (value, index, enable) {
+        var mask = 1 << index;
+        
+        return enable ? ( value | mask ) : ( value & ~mask );
+    }
+
+    var removals_path = ['Visuals', 'Extra','Removals', 'Removals']
     if (visual_controller.is_rendering) {
 
         visual_controller.default_indicators()
@@ -2588,6 +2624,11 @@ function draw_kalbek() {
         damage_marker.render()
         custom_scope.render()
         
+    }
+    else {
+        
+        UI.SetValue(removals_path, set_dropdown_value(UI.GetValue(removals_path), 2, 1))
+        Convar.SetInt("r_drawvgui", 1)
     }
 }
 Cheat.RegisterCallback('Draw', 'visual_controller.start_render')
