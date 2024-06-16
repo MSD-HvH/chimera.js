@@ -260,7 +260,7 @@ menu.helpers = {
         return !pressed_keys[key] && last_pressed_keys[key]
     },
     override_alpha : function(color, alpha) {
-        return [color[0], color[1], color[2], Math.round(alpha * 255)]
+        return [Number(color[0]), Number(color[1]), Number(color[2]), Number(Math.round(alpha * 255))]
     }
 }
 
@@ -2478,6 +2478,8 @@ custom_scope.render = function() {
     var length = ui_handler.elements['Visuals']['custom_scope_size'].reference.value * custom_scope.animation_state
     var color = ui_handler.elements['Visuals']['custom_scope_color'].reference.color
 
+
+    //Cheat.Print(typeof(menu.helpers.override_alpha(color, 0)[0]) + ' | ' + (menu.helpers.override_alpha(color, 0)[0]) + '\n')
     Render.GradientRect(defines.screen_size[0] / 2 + center_offset + 1, defines.screen_size[1] / 2, length, 1, 1, menu.helpers.override_alpha(color, custom_scope.animation_state), menu.helpers.override_alpha(color, 0) )
     Render.GradientRect(defines.screen_size[0] / 2 - center_offset - length, defines.screen_size[1] / 2, length, 1, 1, menu.helpers.override_alpha(color, 0), menu.helpers.override_alpha(color, custom_scope.animation_state) )
     
